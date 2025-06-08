@@ -1,15 +1,16 @@
+import { ConnectDB } from "./data/mongo/init"
 import { AppRoutes } from "./presentation/routes"
 import { Server } from "./presentation/server"
-
+import 'dotenv/config'
 (async()=> {
     main()
 })()
 
-function main(){
+async function main(){
     const server = new Server({
-        port: 3000,
+        port: process.env.PORT!,
         routes:  AppRoutes.routes
     })
-
+    await ConnectDB.init()
     server.start()
 }

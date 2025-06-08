@@ -2,12 +2,12 @@ import { Router } from "express";
 import express from 'express';
 
 type ServerOptions = {
-    port: number;
+    port:  string;
     routes: Router
 }
 export class Server {
     public app = express()
-    private readonly port: number;
+    private readonly port: string;
     private readonly routes: Router;
     private serverListener: any;
 
