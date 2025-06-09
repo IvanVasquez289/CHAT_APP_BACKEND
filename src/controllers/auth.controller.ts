@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
-import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/jwt-adapter";
+import { generateSalt, hashPassword } from "../lib/bcrypt-adapter";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, fullName, password } = req.body;
@@ -23,8 +23,8 @@ export const signup = async (req: Request, res: Response) => {
         return;
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const salt = await generateSalt();
+    const hashedPassword = await hashPassword(password, salt);
     const newUser = new User({
       email,
       fullName,
