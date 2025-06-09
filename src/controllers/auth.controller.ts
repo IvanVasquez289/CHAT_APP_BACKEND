@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { generateToken } from "../lib/jwt-adapter";
-import { generateSalt, hashPassword } from "../lib/bcrypt-adapter";
+import { comparePassword, generateSalt, hashPassword } from "../lib/bcrypt-adapter";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, fullName, password } = req.body;
@@ -50,9 +50,46 @@ export const signup = async (req: Request, res: Response) => {
     return
   }
 };
-export const login = (req: Request, res: Response) => {
-  res.status(200).json({ message: "Login successful" });
+export const login = async (req: Request, res: Response) => {
+  const {email,password} = req.body;
+  try {
+    if(!email || !password) {
+      res.status(400).json({ message: "All fields are required" });
+      return;
+    }
+
+    const user = await User.findOne({email})
+    if(!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const isValidPassword = await comparePassword(password, user.password)
+    if(!isValidPassword){
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
+    }
+
+    // generate token here
+    generateToken(user._id, res);
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      profilePic: user.profilePic,
+    })
+  } catch (error) {
+    console.log("Error in login controller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 export const logout = (req: Request, res: Response) => {
-  res.status(200).json({ message: "Logout successful" });
+  try {
+    // Clear the token by setting it to an empty string
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout controller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
