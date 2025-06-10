@@ -17,3 +17,7 @@ export const generateToken = (userId:Types.ObjectId, res:Response) => {
     
     return token
 }
+
+export const verifyToken = (token: string) => {
+    return jwt.verify(token, process.env.JWT_SECRET!)
+}
