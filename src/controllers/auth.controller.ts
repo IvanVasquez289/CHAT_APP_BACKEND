@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { generateToken } from "../lib/jwt-adapter";
 import { comparePassword, generateSalt, hashPassword } from "../lib/bcrypt-adapter";
+import cloudinary from "../lib/cloudinary";
 
 export const signup = async (req: Request, res: Response) => {
   const { email, fullName, password } = req.body;
@@ -95,5 +96,19 @@ export const logout = (req: Request, res: Response) => {
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
-  res.status(200).json(req.user);
+  const {profilePic} = req.body;
+  const userId = req.user?._id;
+  try {
+    if(!profilePic){
+      res.status(400).json({ message: "Profile picture is required" });
+      return;
+    }
+
+    const uploadImage = await cloudinary.uploader.upload(profilePic)
+    const updateUser = await User.findByIdAndUpdate(userId, {profilePic: uploadImage.secure_url}, {new: true});
+    res.status(200).json(updateUser)
+  } catch (error) {
+    console.log("Error in updateProfile controller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
