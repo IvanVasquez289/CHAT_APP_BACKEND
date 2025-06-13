@@ -20,7 +20,7 @@ export const signup = async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email });
     if (user) {
-        res.status(400).json({ message: "User already exists" });
+        res.status(409).json({ message: "User already exists" });
         return;
     }
 
@@ -43,7 +43,7 @@ export const signup = async (req: Request, res: Response) => {
         profilePic: newUser.profilePic,
       });
     } else {
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(422).json({ message: "Invalid user data" });
       return
     }
   } catch (error) {
@@ -61,7 +61,7 @@ export const login = async (req: Request, res: Response) => {
 
     const user = await User.findOne({email})
     if(!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({ message: "Invalid Credentials" });
       return;
     }
 
