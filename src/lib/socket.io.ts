@@ -3,9 +3,9 @@ import express from 'express';
 import http from 'http';
 
 
-const app = express()
-const server = http.createServer(app)
-const io = new Server(server,{
+export const app = express()
+export const server = http.createServer(app)
+export const io = new Server(server,{
     cors: {
         origin: "http://localhost:5173",
         credentials: true
@@ -14,6 +14,10 @@ const io = new Server(server,{
 
 const connectedUsers: { [userId: string]: string } = {}; // {userId: socketId}
 const messages = [] ;
+
+export const getReceiverSocketId = (receiverId: string) => {
+    return connectedUsers[receiverId]
+}
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId as string
     // io.emit is used to send events to all connected users
@@ -29,5 +33,3 @@ io.on("connection", (socket) => {
 
    
 })
-
-export {app, server}

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { Message } from "../models/message.model";
 import cloudinary from "../lib/cloudinary";
+import { getReceiverSocketId, io } from "../lib/socket.io";
 
 export const getUsersForSidebar = async (req: Request, res: Response) => {
     try {
@@ -61,6 +62,10 @@ export const sendMessage = async (req: Request, res: Response) => {
         res.status(201).json(newMessage)
 
         // TODO: REAL TIME FUNCTIONALITY WITH SOCKET.IO
+        const receiverSockerId = getReceiverSocketId(receiverId);
+        if(receiverSockerId){
+            io.to(receiverSockerId).emit("newMessage", newMessage)
+        }
     } catch (error) {
         console.error("Error sending message:", error);
         res.status(500).json({ message: "Internal server error" });
